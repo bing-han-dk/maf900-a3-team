@@ -46,3 +46,6 @@ data_ret <- data_ret %>%
   ) %>%
   ungroup()%>%
   filter(!is.na(ret))
+
+msf <- data_ret %>%
+  select(permno, month, ret)
