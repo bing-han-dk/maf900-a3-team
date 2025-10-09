@@ -14,16 +14,9 @@ library(gt)
 library(purrr)
 
 
-# Log into WRDS database: Change the user name into your own #
-
-wrds <- DBI::dbConnect(
-  RPostgres::Postgres(),
-  host   = "wrds-pgdata.wharton.upenn.edu",
-  port   = 9737,
-  dbname = "wrds",
-  sslmode = "require",
-  user   = "your_own_user_name"
-)
+# ==============================
+# Helpers used in Table 1
+# ==============================
 
 # Helper to build month sequences (first-of-month convention)
 mon_seq <- function(start, end) seq(from = start, to = end, by = "month")
@@ -97,4 +90,43 @@ make_panel_df <- function(which_periods) {
   names(out) <- c("row_label", as.character(which_periods))
   out
 }
+
+
+# ==============================
+# Helpers used in Table 2
+# ==============================
+mon_seq <- function(start_date, end_date) {
+  start <- as.Date(paste0(year(start_date), "-", month(start_date), "-01"))
+  end   <- as.Date(paste0(year(end_date),   "-", month(end_date),   "-01"))
+  as.Date((seq(start, end, by = "month") + months(1) - days(1)))
+}
+
+ols_one_x <- function(x, y) {
+  x <- as.numeric(x); y <- as.numeric(y)
+  ok <- is.finite(x) & is.finite(y)
+  x <- x[ok]; y <- y[ok]
+  n <- length(y)
+  if (n < 3 || sd(x) == 0) return(list(beta = NA_real_, r2 = NA_real_, s_res = NA_real_, s_y = sd(y), n = n))
+  bx <- cov(x, y) / var(x)
+  a  <- mean(y) - bx * mean(x)
+  yhat <- a + bx * x
+  res  <- y - yhat
+  r2   <- if (var(y) == 0) 0 else 1 - var(res)/var(y)
+  sres <- sd(res)
+  list(beta = bx, r2 = r2, s_res = sres, s_y = sd(y), n = n)
+}
+
+assign_20_portfolios <- function(df_ranked) {
+  N <- nrow(df_ranked)
+  base <- floor(N / 20)
+  L <- N - base * 20
+  counts <- rep(base, 20)
+  counts[1]  <- base + floor(L/2)
+  counts[20] <- base + ceiling(L/2)
+  cuts <- cumsum(counts)
+  df_ranked %>%
+    mutate(port = findInterval(row_number(), cuts) + 1L) %>%
+    mutate(port = pmin(port, 20L))
+}
+
 
