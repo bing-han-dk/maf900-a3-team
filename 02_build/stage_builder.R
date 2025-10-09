@@ -105,8 +105,41 @@ result_all <- data.frame()
 
 # --- loop start (for P1-P9)
 
+for (p in 1:length(periods)) {
+  period <- periods[[p]]
+  
+  message("Processing period ", period$name, " ...")
+  
+  fstart <- period$fstart
+  fend   <- period$fend
+  estart <- period$estart
+  eend   <- period$eend
+  tstart <- period$tstart
+  tend   <- period$tend
+
+  N1<-length(unique((data_ret %>% filter(year == tstart & month ==1))$permno))
+  message("No. of securities available: ", N1)
+  
 # formation state
-# TODO:
+  
+  formation_data<-data_ret %>% filter(year >= fstart & year <= fend)
+  
+  message(length(unique(formation_data$permno)), " stocks in formation_data")
+  
+  beta_f <- formation_data %>% 
+    group_by(permno) %>%
+    do(estimate_beta(data = ., min_obs = 48)) %>% 
+    ungroup()%>%
+    filter(!is.na(beta))
+  
+  message(length(unique(beta_f$permno)), " stocks in beta_f")
+  
+  
+  # assign portfolios
+  beta_f<-assign_portfolios(beta_f)
+  
+  # check assigned result
+  beta_f %>% count(portfolio) 
 
 
 
@@ -119,6 +152,6 @@ result_all <- data.frame()
 # TODO:
 
 
-
+}
 # --- end loop
 
