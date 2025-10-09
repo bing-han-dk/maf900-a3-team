@@ -124,16 +124,11 @@ for (p in 1:length(periods)) {
   
   formation_data<-data_ret %>% filter(year >= fstart & year <= fend)
   
-  message(length(unique(formation_data$permno)), " stocks in formation_data")
-  
   beta_f <- formation_data %>% 
     group_by(permno) %>%
     do(estimate_beta(data = ., min_obs = 48)) %>% 
     ungroup()%>%
     filter(!is.na(beta))
-  
-  message(length(unique(beta_f$permno)), " stocks in beta_f")
-  
   
   # assign portfolios
   beta_f<-assign_portfolios(beta_f)
