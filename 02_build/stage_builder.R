@@ -4,6 +4,9 @@ library(tidyverse)
 library(broom)
 
 
+source("02_build/stage_functions.R")
+
+
 # --- build stages start ----
 
 # define periods
@@ -92,7 +95,7 @@ for (p in 1:length(periods)) {
   # check assigned result
   beta_f %>% count(portfolio) 
 
-
+  
 
 # estimation stage 
   
@@ -110,15 +113,69 @@ for (p in 1:length(periods)) {
     estimatation_data<-data_ret %>% filter(year >= estart & year <= (eend+n))%>%
       filter(!is.na(ret)) # ------------> 
     
+    message(length(unique(estimatation_data$permno)), " stocks in estimatation_data")
+    
     beta_e <- estimatation_data %>% 
       group_by(permno) %>%
       do(estimate_beta(data = ., min_obs = 60)) %>%
       ungroup() %>%
       filter(!is.na(beta))
     
-    # TODO: portfolio beta of year i (all months)
+    message(length(unique(beta_e$permno)), " stocks in beta_e")
+    
+    # portfolio beta of year i (all months)
+    beta_p_year <- purrr::map_dfr(1:12, function(m) {
+      
+      # merge month i's delisting return
+      data_ret_m <- data_ret %>%
+        filter(year == i, month == m) %>%
+        left_join(
+          data_delist %>% select(permno, dlstdt, dlret)
+          ,by = "permno"
+        ) %>%
+        mutate(
+          ret = ifelse(
+            !is.na(dlstdt)&year(dlstdt)==i&month(dlstdt)==m,
+            (1+ret)*(1+coalesce(dlret, 0))-1, ret))
+      
+      # make delisting set
+      first_date  <- as.Date(sprintf("%d-%02d-01", i, m))
+      delist_set <- data_delist %>%
+        filter(!is.na(dlstdt), dlstdt < first_date) %>%
+        pull(permno)
+      
+      # merge beta_f, beta_e and data_ret, excluding delisted 
+      df_m <- beta_f %>%
+        inner_join(beta_e, by = "permno") %>%
+        filter(!(permno %in% delist_set)) %>%
+        inner_join(
+          data_ret_m %>% select(permno, ret),
+          by = "permno"
+        ) %>%
+        select(permno, portfolio, beta = beta.y, sd_resid = sd_resid.y, ret)
+      
+      if (i == tstart && m == 1) {
+        N2<-length(unique(df_m$permno))
+        message("No. of securities meeting data requirements: ", N2)
+      }
+      
+      # calculate portfolio beta, se and return 
+      df_m %>%
+        group_by(portfolio) %>%
+        summarise(
+          beta = mean(beta, na.rm = TRUE),
+          sd_resid = mean(sd_resid,   na.rm = TRUE),
+          ret  = mean(ret,  na.rm = TRUE),
+          .groups = "drop"
+        ) %>%
+        mutate(year = i, month = m) %>%
+        select(year, month, portfolio, beta, sd_resid, ret)
+    })
+    
+    beta_p_year
     
   })
+  
   
   result_all <- rbind(result_all, beta_p_all)
   
