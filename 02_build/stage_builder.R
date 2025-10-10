@@ -1,4 +1,8 @@
 library(dplyr)
+library(lubridate)
+library(tidyverse)
+library(broom)
+
 
 # --- functions start ----
 
@@ -48,7 +52,7 @@ assign_portfolios <- function(beta_df, n_port = 20) {
 
 
 
-# --- build states start ----
+# --- build stages start ----
 
 # define periods
 periods <- list(
@@ -120,7 +124,7 @@ for (p in 1:length(periods)) {
   N1<-length(unique((data_ret %>% filter(year == tstart & month ==1))$permno))
   message("No. of securities available: ", N1)
   
-# formation state
+# formation stage
   
   formation_data<-data_ret %>% filter(year >= fstart & year <= fend)
   
@@ -138,9 +142,34 @@ for (p in 1:length(periods)) {
 
 
 
-# estimation state 
-# TODO:
-
+# estimation stage 
+  
+  # portfolio beta of entire period 
+  beta_p_all <- purrr::map_dfr(tstart:tend, function(i) {
+    # Using purrr::map_dfr & anonymous function can effectively 
+    # avoid using for loop to generate too many intermediate variables,
+    # and avoid passing too many parameters when defining normal.
+    
+    message("Processing year ", i, " ...")
+    
+    n <- i - tstart
+    
+    # re-cumpute individual beta & s(e)
+    estimatation_data<-data_ret %>% filter(year >= estart & year <= (eend+n))%>%
+      filter(!is.na(ret)) # ------------> 
+    
+    beta_e <- estimatation_data %>% 
+      group_by(permno) %>%
+      do(estimate_beta(data = ., min_obs = 60)) %>%
+      ungroup() %>%
+      filter(!is.na(beta))
+    
+    # TODO: portfolio beta of year i (all months)
+    
+  })
+  
+  result_all <- rbind(result_all, beta_p_all)
+  
 
 
 # portfolio level estimation (table 2)
