@@ -180,9 +180,40 @@ for (p in 1:length(periods)) {
   result_all <- rbind(result_all, beta_p_all)
   
 
-
-# portfolio level estimation (table 2)
-# TODO:
+  
+  # portfolio level estimation (table 2)
+  beta_p_est <- beta_f %>%
+    inner_join(
+      data_ret %>%
+        filter(year >= estart & year <= eend) %>%
+        select(permno, ret, mkt, year, month),
+      by = "permno"
+    ) %>%
+    group_by(year, month, portfolio) %>%
+    summarise(
+      ret = mean(ret, na.rm = TRUE), 
+      mkt = mean(mkt, na.rm = TRUE), 
+      .groups = "drop"
+    )%>%
+    group_by(portfolio) %>%
+    do(estimate_beta(data = ., min_obs = 60)) %>%
+    ungroup()
+  
+  # --- table 2
+  stat_t2 <- beta_p_est %>%
+    left_join(
+      beta_p_all %>%
+        filter(year == tstart, month == 1) %>% 
+        select(portfolio, sd_resid_i = sd_resid),
+      by = "portfolio"
+    ) %>%
+    mutate(sd_resid_over = sd_resid / sd_resid_i)
+  
+  stat_t2_t <- t(stat_t2)
+  
+  
+  
+  # TODO: collect all stat_t2
 
 
 }
