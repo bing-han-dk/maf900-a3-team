@@ -1,3 +1,6 @@
+library(RPostgres)
+library(dplyr)
+
 # Log into WRDS database: Change the user name into your own #
 
 wrds <- DBI::dbConnect(

@@ -1,5 +1,10 @@
-# crsp monthly retrun data #
+library(lubridate)
 
+
+source("utils/connect_to_database.R")
+
+
+# crsp monthly retrun data #
 res_ret <- dbSendQuery(wrds, "
                   SELECT 
                     a.permno, a.date, a.ret
