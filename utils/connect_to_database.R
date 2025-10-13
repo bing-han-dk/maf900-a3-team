@@ -9,5 +9,5 @@ wrds <- DBI::dbConnect(
   port   = 9737,
   dbname = "wrds",
   sslmode = "require",
-  user   = "your_own_user_name"
+  user   = "s225233606"
 )
