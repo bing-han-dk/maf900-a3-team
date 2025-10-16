@@ -242,12 +242,6 @@ This project is for academic, educational, and replication use only. No guarante
 
 ---
 
-## 👥 Authors
-
-* **Peter YIN, Bing HAN**
-
----
-
 ## 📬 Contact
 
 Open a GitHub issue or email if you need help reproducing results or adapting the methodology.
