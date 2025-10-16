@@ -246,18 +246,4 @@ This project is for academic, educational, and replication use only. No guarante
 
 Open a GitHub issue or email if you need help reproducing results or adapting the methodology.
 
-```
 
----
-
-## ✅ How to Use
-
-1. Copy the full `README.md` content above.
-2. Paste it into your project root as `README.md`.
-3. Optional:
-   - Add screenshots of tables/plots
-   - Add hyperlinks to `outputs/` folder
-   - Create `.Rproj` file for reproducibility
-
-Let me know if you'd like a PDF version or an `.Rmd` version renderable via **RMarkdown**.
-```
