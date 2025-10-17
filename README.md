@@ -263,17 +263,6 @@ Defined in `utils/global_functions.R`:
 
 ---
 
-## 📤 Exporting Tables
-
-Export with `gt` or `kableExtra`:
-
-```r
-library(gt)
-gt(stat_t2_list[[1]]) %>% gtsave("outputs/table2_P1.png")
-```
-
----
-
 ## 🧾 License
 
 This project is for academic, educational, and replication use only. No guarantees. Not affiliated with any financial institution.
