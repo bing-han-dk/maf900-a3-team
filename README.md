@@ -12,21 +12,20 @@ This project replicates the key tables in a cross-sectional asset pricing study 
 
 ```text
 .
+├── 00_utils/
+│   ├── connect_to_database.R        # WRDS connection script
+│   └── global_functions.R           # Core helper/statistical functions
 ├── 01_extract/
 │   └── data_extract_clean.R         # Pulls and cleans data from WRDS
 ├── 02_build/
 │   ├── table_1_sec_count.R          # Generates Table 1 stock counts
 │   ├── table_2_build_up.R           # Generates Table 2 beta stats
-│   └── stage_builder.R              # Portfolio formation & FM regression logic
-├── 03_models/						 # Reserved
-├── outputs/						 # Replication report 
-├── utils/
-│   ├── connect_to_database.R        # WRDS connection script
-│   └── global_functions.R           # Core helper/statistical functions
-├── viz/
-│   ├── plot_table2_betas.R          # Visualizations for Table 2 results
-│   └── plot_fmb_gammas.R            # Visualizations for FMB γ estimates
-├── outputs/                         # Exported tables and figures
+│   └── table_3_build_up.R           # Portfolio formation & FM regression logic
+├── 03_viz/
+│   ├── table_1_viz.R                # Visualizations for Table 1 results
+│   ├── table_2_viz.R                # Visualizations for Table 2 results
+│   ├── table_3_viz.R                # Visualizations for Table 3 results
+├── 04_outputs/                      # Replication report and exported tables and figures
 ├── README.md                        # This file
 ```
 
@@ -81,11 +80,7 @@ Pulls and merges:
 
 ### 🔹 Step 2: Portfolio Construction & Estimation
 
-```r
-source("02_build/stage_builder.R")
-```
-
-Key steps:
+Key logic:
 
 * Constructs 9 rolling periods (P1–P9)
 * Applies eligibility filters:
@@ -140,7 +135,7 @@ Output: `stat_t2_list[[i]]` for each period.
 
 ### 📄 Table 3: Fama-MacBeth Regressions
 
-**Script:** part of `02_build/stage_builder.R`
+**Script:** part of `02_build/table_3_build_up.R`
 
 Runs cross-sectional regressions each month over test windows:
 
