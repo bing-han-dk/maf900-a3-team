@@ -1,6 +1,4 @@
 # Load necessary packages #
-
-library(RPostgres)
 library(dplyr)
 library(lubridate)
 library(tidyverse)
@@ -12,7 +10,7 @@ library(knitr)
 library(kableExtra)
 library(gt)
 library(purrr)
-
+library(tibble)
 
 # ==============================
 # Helpers used in Table 1

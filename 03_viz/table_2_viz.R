@@ -1,5 +1,5 @@
 # ==============================
-# Present Table 2 like the paper (unchanged)
+# Present Table 2 like the paper
 # ==============================
 fmt_three <- function(x) ifelse(is.na(x), "", sprintf("%.3f", x))
 

@@ -1,14 +1,3 @@
-library(dplyr)
-library(tidyverse)
-library(broom)
-library(purrr)
-library(tibble)
-library(tidyr)
-
-
-source("01_extract/data_extract_clean.R")
-source("utils/global_functions.R")
-
 
 
 # --- build stages start ----
@@ -288,8 +277,6 @@ for (period_name in names(periods_2)) {
 
 # Combine all
 fmb_results_df <- bind_rows(fmb_results_all)
-rm(fmb_results_df)
-
 
 desired_order <- c(
   "model", "period",

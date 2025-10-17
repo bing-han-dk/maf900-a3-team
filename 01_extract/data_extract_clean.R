@@ -1,8 +1,6 @@
-library(lubridate)
 
-
-source("utils/connect_to_database.R")
-
+source("00_utils/connect_to_database.R")# Remember to change the user name if there is error coming from this script.
+source("00_utils/global_functions.R")
 
 # crsp monthly retrun data #
 res_ret <- dbSendQuery(wrds, "
@@ -19,6 +17,7 @@ res_ret <- dbSendQuery(wrds, "
     
       ")
 data_ret <- dbFetch(res_ret)
+data_ret_table_1 <- dbFetch(res_ret)
 dbClearResult(res_ret)
 
 
@@ -52,5 +51,19 @@ data_ret <- data_ret %>%
   ungroup()%>%
   filter(!is.na(ret))
 
-msf <- data_ret %>%
+msf <- data_ret_table_1 %>%
+  mutate(
+    month = floor_date(as.Date(date), unit = "month"),
+    ret   = suppressWarnings(as.numeric(ret))   # keep NA if not available
+  ) %>%
+  select(permno, month, ret)
+
+
+# This is for table 2 constructions only
+msf_2 <- data_ret_table_1 %>%
+  mutate(
+    date  = as.Date(date),
+    month = as.Date(floor_date(date, "month") + months(1) - days(1)),
+    ret   = suppressWarnings(as.numeric(ret))
+  ) %>%
   select(permno, month, ret)

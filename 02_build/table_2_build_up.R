@@ -1,5 +1,3 @@
-# Get all the global function working #
-source("utils/global_functions.R")
 
 # ==============================
 # Period setup (four selected estimation windows → Table 2)
@@ -20,17 +18,17 @@ compute_table2_one <- function(form_start, form_end, est_start, est_end, test_st
   est_months  <- mon_seq(est_start,  est_end)
   
   # --- Eligibility (exists at first test month; full 60m in est; >=48m in formation)
-  avail <- msf %>%
+  avail <- msf_2 %>%
     filter(month == test_start, !is.na(ret)) %>%
     distinct(permno)
   
-  est_ok <- msf %>%
+  est_ok <- msf_2 %>%
     filter(month %in% est_months, !is.na(ret)) %>%
     count(permno, name = "n_est") %>%
     filter(n_est == length(est_months)) %>%
     select(permno)
   
-  form_ok <- msf %>%
+  form_ok <- msf_2 %>%
     filter(month %in% form_months, !is.na(ret)) %>%
     count(permno, name = "n_form") %>%
     filter(n_form >= 48) %>%
@@ -39,13 +37,13 @@ compute_table2_one <- function(form_start, form_end, est_start, est_end, test_st
   universe <- avail %>% inner_join(est_ok, by = "permno") %>% inner_join(form_ok, by = "permno")
   
   # --- NEW: Dynamic market series from *eligible universe* --------------------
-  mkt_form <- msf %>%
+  mkt_form <- msf_2 %>%
     semi_join(universe, by = "permno") %>%
     filter(month %in% form_months) %>%
     group_by(month) %>%
     summarise(mkt = mean(ret, na.rm = TRUE), .groups = "drop")
   
-  mkt_est <- msf %>%
+  mkt_est <- msf_2 %>%
     semi_join(universe, by = "permno") %>%
     filter(month %in% est_months) %>%
     group_by(month) %>%
@@ -53,7 +51,7 @@ compute_table2_one <- function(form_start, form_end, est_start, est_end, test_st
   # ---------------------------------------------------------------------------
   
   # --- Formation-period betas → rank → 20 portfolios via FM allocation rule
-  df_form <- msf %>%
+  df_form <- msf_2 %>%
     semi_join(universe, by = "permno") %>%
     filter(month %in% form_months) %>%
     left_join(mkt_form, by = "month") %>%
@@ -66,7 +64,7 @@ compute_table2_one <- function(form_start, form_end, est_start, est_end, test_st
     select(permno, port)
   
   # --- Estimation window: per-security regression (uses mkt_est)
-  sec_est <- msf %>%
+  sec_est <- msf_2 %>%
     semi_join(df_form, by = "permno") %>%
     filter(month %in% est_months) %>%
     left_join(mkt_est, by = "month") %>%
@@ -80,7 +78,7 @@ compute_table2_one <- function(form_start, form_end, est_start, est_end, test_st
     inner_join(df_form, by = "permno")
   
   # --- Estimation window: monthly equal-weighted portfolio returns
-  port_panel <- msf %>%
+  port_panel <- msf_2 %>%
     semi_join(df_form, by = "permno") %>%
     filter(month %in% est_months) %>%
     inner_join(df_form, by = "permno") %>%
@@ -138,3 +136,4 @@ tabs_tbl2 <- periods_tbl2 %>%
       compute_table2_one
     )
   )
+

@@ -1,5 +1,4 @@
-# Get all the global function working #
-source("utils/global_functions.R")
+
 
 # Periods (formation, estimation, testing). Testing periods & counts appear split across two rows in FM Table 1.
 periods <- tibble::tribble(
