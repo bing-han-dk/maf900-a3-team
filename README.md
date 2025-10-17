@@ -157,25 +157,65 @@ Summary includes:
 * Output stored in: `fmb_results_df`
 
 ---
+Based on the code snippets you provided and the image of your project directory (`03_viz/`), here's an updated, well-organized markdown documentation section for the visualizations in your project. This version is:
 
-## 📈 Visualizations (`viz/`)
+* **Consistent**
+* **Concise**
+* **Descriptive**
+* **Formatted for rendering (e.g., GitHub/Quarto)**
 
-### 📉 `plot_table2_betas.R`
+---
 
-* Line plot of estimated portfolio betas across 20 portfolios
-* Can highlight dispersion, linearity, noise
+## 📊 Visualizations (`03_viz/`)
 
-### 📈 `plot_fmb_gammas.R`
+This folder contains scripts for rendering the tables and figures used in the empirical results section.
 
-* Time-series plots of monthly γ₁ estimates (from `ret ~ beta`)
-* Includes shaded confidence bands
-* Optional: Add γ₂ and γ₃ if using Models B/C/D
+### 📋 `table_1_viz.R`
 
-Usage:
+**Description**:
+Generates **Table 1** and **Table 1 (Continued)** summarizing portfolio formation, estimation, and testing periods.
+
+**Usage**:
 
 ```r
-source("viz/plot_table2_betas.R")
-source("viz/plot_fmb_gammas.R")
+source("03_viz/table_1_viz.R")
+render_gt(panel_1_5)       # Main table
+render_gt_ctnd(panel_6_9)  # Continued table
+```
+
+---
+
+### 📋 `table_2_viz.R`
+
+**Description**:
+Constructs **Table 2**, reporting sample statistics for selected estimation periods (e.g., betas, R², residual variances). Outputs are split across two pages for portfolios 1–10 and 11–20.
+
+**Usage**:
+
+```r
+source("03_viz/table_2_viz.R")
+tbl2_page1  # Portfolios 1–10
+tbl2_page2  # Portfolios 11–20
+```
+
+---
+
+### 📋 `table_3_viz.R`
+
+**Description**:
+Generates **Table 3**, summarizing Fama–MacBeth regressions across various models and subperiods. Includes statistics like average γs, t-stats, autocorrelations, and R².
+
+**Usage**:
+
+```r
+source("03_viz/table_3_viz.R")
+tbl3 <- make_table3(fmb_results_df)
+```
+
+Optional export:
+
+```r
+make_table3(fmb_results_df, save_path = "results/table3.html")
 ```
 
 ---
@@ -197,14 +237,18 @@ source("viz/plot_fmb_gammas.R")
 
 Defined in `utils/global_functions.R`:
 
-| Function                 | Description                                |
-| ------------------------ | ------------------------------------------ |
-| `estimate_beta()`        | OLS for estimating beta, residual SD, etc. |
-| `assign_20_portfolios()` | Ranks securities into 20 portfolios        |
-| `ols_one_x(x, y)`        | Efficient 1-variable OLS (used everywhere) |
-| `run_fmb()`              | Fama-MacBeth regression logic              |
-| `fmb_coef_stats()`       | Computes gamma summary stats               |
-| `count_block()`          | Counts eligible stocks for Table 1         |
+
+| Function                 | Description                                 |
+|--------------------------|---------------------------------------------|
+| `estimate_beta()`        | Estimates beta, standard error, R², and residual SD via OLS |
+| `assign_portfolios()`    | Assigns securities into portfolios based on sorted betas |
+| `assign_20_portfolios()` | Ranks and buckets securities into 20 portfolios |
+| `ols_one_x(x, y)`        | Efficient helper for simple (1-variable) OLS regression |
+| `run_fmb()`              | Runs cross-sectional Fama–MacBeth regressions by month |
+| `fmb_coef_stats()`       | Computes time-series summary stats for gamma estimates |
+| `count_block()`          | Counts eligible stocks per period for Table 1 |
+| `make_panel_df()`        | Prepares compact summary table for Table 1 |
+| `mon_seq()`              | Helper to generate first-of-month sequences |
 
 ---
 
